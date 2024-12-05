@@ -1,58 +1,30 @@
-buildscript {
-  ext.kotlin_version = '1.0.3'
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-  }
-}
-
 plugins {
-  id "com.gradle.plugin-publish" version "0.9.5"
+  id 'java'
+  id('org.jetbrains.kotlin.jvm') version '1.6.21'
+  id 'maven-publish'
+  id 'com.gradle.plugin-publish' version '0.21.0'
 }
 
-apply plugin: "kotlin"
+group 'io.errorlab.gradle'
+version '0.1.0'
+
+ext {
+  nexusUsername = ''
+  nexusPassword = ''
+  nexusProxyRepository = ''
+  nexusReleaseRepository = ''
+}
+
+apply from: 'build.gradle.local'
 
 repositories {
-  mavenCentral()
-  jcenter()
-  maven {
-    url  "http://dl.bintray.com/kunickiaj/maven"
-  }
-
+  maven { url nexusProxyRepository }
 }
 
-version = '0.1.0'
-
-dependencies {
-  compile gradleApi()
-  compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.0.3'
-  compile group: 'com.adamkunicki', name: 'vault-kotlin', version: '0.2.0'
-}    
-
-
 pluginBundle {
-  website = 'https://github.com/kiddouk/gradle-vault'
-  vcsUrl = 'https://github.com/kiddouk/gradle-vault'
-  // The plugins block can contain multiple plugin entries.
-  //
-  // The name for each plugin block below (greetingsPlugin, goodbyePlugin)
-  // does not affect the plugin configuration, but they need to be unique
-  // for each plugin.
-
-  // Plugin config blocks can set the id, displayName, version, description
-  // and tags for each plugin.
-
-  // id and displayName are mandatory.
-  // If no version is set, the project version will be used.
-  // If no tags or description are set, the tags or description from the
-  // pluginBundle block will be used, but they must be set in one of the
-  // two places.
-
+  website = 'https://github.com/BTLzdravtech/gradle-vault'
+  vcsUrl = 'https://github.com/BTLzdravtech/gradle-vault'
   plugins {
-
-    // first plugin
     vaultPlugin {
       id = 'io.errorlab.gradle.vault'
       displayName = 'Hashicorp Vault plugin'
@@ -61,5 +33,30 @@ pluginBundle {
       version = '0.1.0'
     }
   }
+}
 
+publishing {
+  publications {
+    maven(MavenPublication) {
+      groupId = 'io.errorlab.gradle'
+      artifactId = 'vault'
+      version = '0.1.0'
+
+      from components.java
+    }
+  }
+  repositories {
+    maven {
+      url nexusReleaseRepository
+      credentials {
+        username nexusUsername
+        password nexusPassword
+      }
+    }
+  }
+}
+
+dependencies {
+  implementation gradleApi()
+  implementation group: 'com.adamkunicki', name: 'vault-kotlin', version: '0.2.0'
 }
